@@ -8,6 +8,7 @@ public class ReturnInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        ctx.setResult(ctx.stack.pop());
+        ctx.terminatedStacks.addAll(ctx.liveStacks);
+        ctx.liveStacks.clear();
     }
 }

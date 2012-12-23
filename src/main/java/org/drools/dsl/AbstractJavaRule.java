@@ -15,7 +15,7 @@ public abstract class AbstractJavaRule {
 
     public abstract void rhs();
 
-    public void setValue(String name, Object value) {
+    public final void setValue(String name, Object value) {
         try {
             Field field = getClass().getDeclaredField(name);
             field.setAccessible(true);

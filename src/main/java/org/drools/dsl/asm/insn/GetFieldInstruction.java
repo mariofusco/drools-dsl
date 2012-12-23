@@ -1,5 +1,7 @@
 package org.drools.dsl.asm.insn;
 
+import java.util.Stack;
+
 public class GetFieldInstruction implements Instruction {
 
     private final String name;
@@ -11,11 +13,13 @@ public class GetFieldInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        String owner = ctx.stack.pop();
-        if (owner.equals("this")) {
-            ctx.stack.push(name);
-        } else {
-            ctx.stack.push(owner + "." + name);
+        for (Stack<String> stack : ctx.liveStacks) {
+            String owner = stack.pop();
+            if (owner.equals("this")) {
+                stack.push(name);
+            } else {
+                stack.push(owner + "." + name);
+            }
         }
     }
 

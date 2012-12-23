@@ -1,7 +1,11 @@
 package org.drools.dsl.asm;
 
+import org.drools.dsl.asm.insn.Comparison;
 import org.drools.dsl.asm.insn.GetFieldInstruction;
+import org.drools.dsl.asm.insn.GotoInstruction;
 import org.drools.dsl.asm.insn.Instruction;
+import org.drools.dsl.asm.insn.JumpInstruction;
+import org.drools.dsl.asm.insn.LabelInstruction;
 import org.drools.dsl.asm.insn.LoadConstantInstruction;
 import org.drools.dsl.asm.insn.LoadInstruction;
 import org.drools.dsl.asm.insn.MethodInvocationInstruction;
@@ -52,17 +56,41 @@ public class LhsVisitor implements MethodVisitor, Opcodes {
         switch (opcode) {
             case IRETURN:
                 instructions.add(new ReturnInstruction());
+                break;
+            case ICONST_0:
+                instructions.add(new LoadConstantInstruction(0));
+                break;
+            case ICONST_1:
+                instructions.add(new LoadConstantInstruction(1));
+                break;
+            case ICONST_2:
+                instructions.add(new LoadConstantInstruction(2));
+                break;
+            case ICONST_3:
+                instructions.add(new LoadConstantInstruction(3));
+                break;
+            case ICONST_4:
+                instructions.add(new LoadConstantInstruction(4));
+                break;
+            case ICONST_5:
+                instructions.add(new LoadConstantInstruction(5));
+                break;
         }
     }
 
     public void visitIntInsn(int opcode, int operand) {
-        System.out.println("visitIntInsn " + opcode + ", " + operand);
+        switch (opcode) {
+            case BIPUSH:
+                instructions.add(new LoadConstantInstruction((char)operand));
+        }
+        // System.out.println("visitIntInsn " + opcode + ", " + operand);
     }
 
     public void visitVarInsn(int opcode, int var) {
         switch (opcode) {
             case ALOAD:
                 instructions.add(new LoadInstruction(var));
+                break;
         }
         // System.out.println("visitVarInsn " + opcode + ", " + var);
     }
@@ -83,11 +111,42 @@ public class LhsVisitor implements MethodVisitor, Opcodes {
     }
 
     public void visitJumpInsn(int opcode, Label label) {
-        System.out.println("visitJumpInsn " + opcode + ", " + label);
+        switch (opcode) {
+            case IFEQ:
+            case IF_ICMPEQ:
+            case IF_ACMPEQ:
+                instructions.add(new JumpInstruction(Comparison.EQ, label.toString()));
+                break;
+            case IFNE:
+            case IF_ICMPNE:
+            case IF_ACMPNE:
+                instructions.add(new JumpInstruction(Comparison.NE, label.toString()));
+                break;
+            case IFGT:
+            case IF_ICMPGT:
+                instructions.add(new JumpInstruction(Comparison.GT, label.toString()));
+                break;
+            case IFGE:
+            case IF_ICMPGE:
+                instructions.add(new JumpInstruction(Comparison.GE, label.toString()));
+                break;
+            case IFLT:
+            case IF_ICMPLT:
+                instructions.add(new JumpInstruction(Comparison.LT, label.toString()));
+                break;
+            case IFLE:
+            case IF_ICMPLE:
+                instructions.add(new JumpInstruction(Comparison.LE, label.toString()));
+                break;
+            case GOTO:
+                instructions.add(new GotoInstruction(label.toString()));
+                break;
+        }
+        // System.out.println("visitJumpInsn " + opcode + ", " + label);
     }
 
     public void visitLabel(Label label) {
-        // System.out.println("visitLabel " + label);
+        instructions.add(new LabelInstruction(label.toString()));
     }
 
     public void visitLdcInsn(Object cst) {

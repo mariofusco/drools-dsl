@@ -1,5 +1,7 @@
 package org.drools.dsl.asm.insn;
 
+import java.util.Stack;
+
 public class LoadInstruction implements Instruction {
     private final int index;
 
@@ -13,8 +15,10 @@ public class LoadInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        if (index == 0) {
-            ctx.stack.push("this");
+        for (Stack<String> stack : ctx.liveStacks) {
+            if (index == 0) {
+                stack.push("this");
+            }
         }
     }
 }

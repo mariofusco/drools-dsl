@@ -13,6 +13,7 @@ import org.mvel2.asm.MethodVisitor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import static org.mvel2.asm.Type.getType;
 
@@ -79,7 +80,20 @@ public class RuleIntrospector implements ClassVisitor {
             instruction.process(processingContext);
         }
 
-        String result = processingContext.getResult();
+        String result = null;
+        for (Stack<String> stack : processingContext.getTerminatedStacks()) {
+            result = stack.pop();
+            if (result.equals("1")) {
+                result = stack.pop();
+                break;
+            } else if (result.equals("0")) {
+                result = null;
+                continue;
+            }
+        }
+
+        System.out.println(result);
+
         int firstDot = result.indexOf('.');
         String id = result.substring(0, firstDot);
         String constraint = result.substring(firstDot+1);
