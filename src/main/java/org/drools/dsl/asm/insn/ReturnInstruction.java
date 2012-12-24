@@ -8,7 +8,7 @@ public class ReturnInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        ctx.terminatedStacks.addAll(ctx.liveStacks);
-        ctx.liveStacks.clear();
+        ctx.terminatedEnvs.addAll(ctx.liveEnvs);
+        ctx.liveEnvs.clear();
     }
 }

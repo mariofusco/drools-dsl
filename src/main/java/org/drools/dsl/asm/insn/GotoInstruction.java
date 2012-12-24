@@ -13,13 +13,13 @@ public class GotoInstruction implements Instruction  {
     }
 
     public void process(ProcessingContext ctx) {
-        List<Stack<String>> stacks = ctx.suspendedStacks.get(label);
-        if (stacks == null) {
-            stacks = new ArrayList<Stack<String>>();
-            ctx.suspendedStacks.put(label, stacks);
+        List<EvaluationEnvironment> envs = ctx.suspendedEnvs.get(label);
+        if (envs == null) {
+            envs = new ArrayList<EvaluationEnvironment>();
+            ctx.suspendedEnvs.put(label, envs);
         }
-        stacks.addAll(ctx.liveStacks);
-        ctx.liveStacks.clear();
+        envs.addAll(ctx.liveEnvs);
+        ctx.liveEnvs.clear();
     }
 
     @Override

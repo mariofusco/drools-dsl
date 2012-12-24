@@ -1,11 +1,11 @@
 package org.drools.dsl.asm.insn;
 
-import java.util.Stack;
-
 public class LoadInstruction implements Instruction {
+    private final Class<?> ruleClass;
     private final int index;
 
-    public LoadInstruction(int index) {
+    public LoadInstruction(Class<?> ruleClass, int index) {
+        this.ruleClass = ruleClass;
         this.index = index;
     }
 
@@ -15,9 +15,11 @@ public class LoadInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        for (Stack<String> stack : ctx.liveStacks) {
+        for (EvaluationEnvironment env : ctx.liveEnvs) {
             if (index == 0) {
-                stack.push("this");
+                env.stack.push(new EvaluationEnvironment.Item(ruleClass.getName(), "this"));
+            } else {
+                env.stack.push(env.heap.get(index));
             }
         }
     }

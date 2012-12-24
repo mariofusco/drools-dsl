@@ -14,6 +14,10 @@ public enum Comparison {
         return symbol;
     }
 
+    public boolean isEquality() {
+        return this == EQ || this == NE;
+    }
+
     public Comparison getOpposite() {
         switch(this) {
             case EQ: return NE;

@@ -1,7 +1,5 @@
 package org.drools.dsl.asm.insn;
 
-import java.util.Stack;
-
 public class LoadConstantInstruction implements Instruction {
 
     private final Object cst;
@@ -16,13 +14,13 @@ public class LoadConstantInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        for (Stack<String> stack : ctx.liveStacks) {
+        for (EvaluationEnvironment env : ctx.liveEnvs) {
             if (cst instanceof String) {
-                stack.push("\"" + cst + "\"");
+                env.stack.push(new EvaluationEnvironment.Item("java.lang.String", "\"" + cst + "\""));
             } else if (cst instanceof Character) {
-                stack.push("'" + cst + "'");
+                env.stack.push(new EvaluationEnvironment.Item("char", "'" + cst + "'"));
             } else {
-                stack.push(cst.toString());
+                env.stack.push(new EvaluationEnvironment.Item(cst.getClass().getName(), cst.toString()));
             }
         }
     }

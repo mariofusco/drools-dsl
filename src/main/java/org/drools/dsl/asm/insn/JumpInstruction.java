@@ -2,7 +2,6 @@ package org.drools.dsl.asm.insn;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class JumpInstruction implements Instruction {
 
@@ -15,20 +14,29 @@ public class JumpInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        for (Stack<String> stack : ctx.liveStacks) {
-            String op1 = stack.pop();
-            String op2 = stack.pop();
+        for (EvaluationEnvironment env : ctx.liveEnvs) {
+            EvaluationEnvironment.Item op1 = env.stack.pop();
+            EvaluationEnvironment.Item op2 = env.stack.pop();
 
-            Stack<String> clone = (Stack<String>)stack.clone();
-            clone.push(op2 + " " + comparison.getSymbol() + " " + op1);
-            List<Stack<String>> stacks = ctx.suspendedStacks.get(label);
-            if (stacks == null) {
-                stacks = new ArrayList<Stack<String>>();
-                ctx.suspendedStacks.put(label, stacks);
+            EvaluationEnvironment clone = env.clone();
+            if (comparison.isEquality() && op2.type.equals("boolean") && (op1.value.equals("0") || op1.value.equals("1"))) {
+                if (comparison == Comparison.EQ ^ op1.value.equals("1")) {
+                    clone.stack.push(new EvaluationEnvironment.Item("boolean", "!" + op2.value));
+                    env.stack.push(new EvaluationEnvironment.Item("boolean", op2.value));
+                } else {
+                    clone.stack.push(new EvaluationEnvironment.Item("boolean", op2.value));
+                    env.stack.push(new EvaluationEnvironment.Item("boolean", "!" + op2.value));
+                }
+            } else {
+                clone.stack.push(new EvaluationEnvironment.Item("boolean", op2.value + " " + comparison.getSymbol() + " " + op1.value));
+                env.stack.push(new EvaluationEnvironment.Item("boolean", op2.value + " " + comparison.getOpposite().getSymbol() + " " + op1.value));
             }
-            stacks.add(clone);
-
-            stack.push(op2 + " " + comparison.getOpposite().getSymbol() + " " + op1);
+            List<EvaluationEnvironment> envs = ctx.suspendedEnvs.get(label);
+            if (envs == null) {
+                envs = new ArrayList<EvaluationEnvironment>();
+                ctx.suspendedEnvs.put(label, envs);
+            }
+            envs.add(clone);
         }
     }
 

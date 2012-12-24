@@ -1,24 +1,24 @@
 package org.drools.dsl.asm.insn;
 
-import java.util.Stack;
-
 public class GetFieldInstruction implements Instruction {
 
     private final String name;
     private final String owner;
+    private final String type;
 
-    public GetFieldInstruction(String name, String owner) {
+    public GetFieldInstruction(String name, String owner, String type) {
         this.name = name;
         this.owner = owner;
+        this.type = type;
     }
 
     public void process(ProcessingContext ctx) {
-        for (Stack<String> stack : ctx.liveStacks) {
-            String owner = stack.pop();
+        for (EvaluationEnvironment env : ctx.liveEnvs) {
+            String owner = env.stack.pop().value;
             if (owner.equals("this")) {
-                stack.push(name);
+                env.stack.push(new EvaluationEnvironment.Item(type, name));
             } else {
-                stack.push(owner + "." + name);
+                env.stack.push(new EvaluationEnvironment.Item(type, owner + "." + name));
             }
         }
     }

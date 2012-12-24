@@ -10,6 +10,7 @@ import org.drools.dsl.asm.insn.LoadConstantInstruction;
 import org.drools.dsl.asm.insn.LoadInstruction;
 import org.drools.dsl.asm.insn.MethodInvocationInstruction;
 import org.drools.dsl.asm.insn.ReturnInstruction;
+import org.drools.dsl.asm.insn.StoreInstruction;
 import org.mvel2.asm.AnnotationVisitor;
 import org.mvel2.asm.Attribute;
 import org.mvel2.asm.Label;
@@ -20,15 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mvel2.asm.Type.getObjectType;
+import static org.mvel2.asm.Type.getType;
 
 public class LhsVisitor implements MethodVisitor, Opcodes {
 
-    private final String desc;
+    private final Class<?> ruleClass;
 
     private final List<Instruction> instructions = new ArrayList<Instruction>();
 
-    public LhsVisitor(String desc) {
-        this.desc = desc;
+    public LhsVisitor(Class<?> ruleClass) {
+        this.ruleClass = ruleClass;
     }
 
     public AnnotationVisitor visitAnnotationDefault() {
@@ -88,8 +90,19 @@ public class LhsVisitor implements MethodVisitor, Opcodes {
 
     public void visitVarInsn(int opcode, int var) {
         switch (opcode) {
+            case ILOAD:
+            case LLOAD:
+            case FLOAD:
+            case DLOAD:
             case ALOAD:
-                instructions.add(new LoadInstruction(var));
+                instructions.add(new LoadInstruction(ruleClass, var));
+                break;
+            case ISTORE:
+            case LSTORE:
+            case FSTORE:
+            case DSTORE:
+            case ASTORE:
+                instructions.add(new StoreInstruction(var));
                 break;
         }
         // System.out.println("visitVarInsn " + opcode + ", " + var);
@@ -101,7 +114,7 @@ public class LhsVisitor implements MethodVisitor, Opcodes {
 
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
         if (opcode == GETFIELD) {
-            instructions.add(new GetFieldInstruction(name, getObjectType(owner).getClassName()));
+            instructions.add(new GetFieldInstruction(name, getObjectType(owner).getClassName(), getType(desc).getClassName()));
         }
         // System.out.println("visitFieldInsn " + opcode + ", " + owner + ", " + name + ", " + desc);
     }
@@ -113,28 +126,34 @@ public class LhsVisitor implements MethodVisitor, Opcodes {
     public void visitJumpInsn(int opcode, Label label) {
         switch (opcode) {
             case IFEQ:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPEQ:
             case IF_ACMPEQ:
                 instructions.add(new JumpInstruction(Comparison.EQ, label.toString()));
                 break;
             case IFNE:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPNE:
             case IF_ACMPNE:
                 instructions.add(new JumpInstruction(Comparison.NE, label.toString()));
                 break;
             case IFGT:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPGT:
                 instructions.add(new JumpInstruction(Comparison.GT, label.toString()));
                 break;
             case IFGE:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPGE:
                 instructions.add(new JumpInstruction(Comparison.GE, label.toString()));
                 break;
             case IFLT:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPLT:
                 instructions.add(new JumpInstruction(Comparison.LT, label.toString()));
                 break;
             case IFLE:
+                instructions.add(new LoadConstantInstruction(0));
             case IF_ICMPLE:
                 instructions.add(new JumpInstruction(Comparison.LE, label.toString()));
                 break;

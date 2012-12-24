@@ -1,7 +1,6 @@
 package org.drools.dsl.asm.insn;
 
 import java.util.List;
-import java.util.Stack;
 
 public class LabelInstruction implements Instruction  {
 
@@ -12,9 +11,9 @@ public class LabelInstruction implements Instruction  {
     }
 
     public void process(ProcessingContext ctx) {
-        List<Stack<String>> stacks = ctx.suspendedStacks.remove(label);
-        if (stacks != null) {
-            ctx.liveStacks.addAll(stacks);
+        List<EvaluationEnvironment> envs = ctx.suspendedEnvs.get(label);
+        if (envs != null) {
+            ctx.liveEnvs.addAll(envs);
         }
     }
 

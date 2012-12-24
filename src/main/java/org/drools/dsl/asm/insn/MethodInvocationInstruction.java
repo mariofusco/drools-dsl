@@ -3,7 +3,6 @@ package org.drools.dsl.asm.insn;
 import org.drools.dsl.asm.MethodArgsDescr;
 
 import java.util.Arrays;
-import java.util.Stack;
 
 public class MethodInvocationInstruction implements Instruction {
 
@@ -23,12 +22,12 @@ public class MethodInvocationInstruction implements Instruction {
     }
 
     public void process(ProcessingContext ctx) {
-        for (Stack<String> stack : ctx.liveStacks) {
+        for (EvaluationEnvironment env : ctx.liveEnvs) {
             String[] args = new String[methodArgsDescr.getArgs().length];
             for (int i = 0; i < args.length; i++) {
-                args[i] = stack.pop();
+                args[i] = env.stack.pop().value;
             }
-            String invoked = stack.pop();
+            String invoked = env.stack.pop().value;
 
             StringBuilder sb = new StringBuilder();
             sb.append(invoked).append(".").append(name).append("(");
@@ -43,7 +42,7 @@ public class MethodInvocationInstruction implements Instruction {
             }
             sb.append(")");
 
-            stack.push(sb.toString());
+            env.stack.push(new EvaluationEnvironment.Item(methodArgsDescr.getReturn(), sb.toString()));
         }
     }
 

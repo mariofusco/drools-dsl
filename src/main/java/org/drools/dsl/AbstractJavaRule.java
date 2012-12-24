@@ -24,4 +24,8 @@ public abstract class AbstractJavaRule {
             throw new RuntimeException(e);
         }
     }
+
+    protected final boolean not(boolean value) {
+        return value;
+    }
 }

@@ -9,7 +9,8 @@ public class HelloWorldRule extends AbstractJavaRule {
 
     public boolean lhs() {
         // return $msg.getMessage().equals("Hello World");
-        return $msg.getMessage().indexOf('W') > 3;
+        String message = $msg.getMessage();
+        return message.indexOf('W') > 3 && message.indexOf('U') < 0;
     }
 
     public void rhs() {
