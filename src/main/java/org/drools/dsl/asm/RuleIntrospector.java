@@ -31,6 +31,7 @@ public class RuleIntrospector implements ClassVisitor {
     private final Map<String, String> vars = new HashMap<String, String>();
 
     private final Map<String, DslPattern> dslPatterns = new HashMap<String, DslPattern>();
+    private final List<DslPattern> unboundPatterns = new ArrayList<DslPattern>();
 
     public RuleIntrospector(Class<?> ruleClass) {
         this.ruleClass = ruleClass;
@@ -48,11 +49,18 @@ public class RuleIntrospector implements ClassVisitor {
     public Collection<DslPattern> getDslPatterns() {
         List<DslPattern> list = new ArrayList<DslPattern>(dslPatterns.values());
         Collections.sort(list);
+        list.addAll(0, unboundPatterns);
         return list;
     }
 
-    public Map<String, String> getVars() {
-        return vars;
+    public Collection<String> getBoundVars() {
+        List<String> boundVars = new ArrayList<String>();
+        for (Map.Entry<String, DslPattern> entry : dslPatterns.entrySet()) {
+            if (entry.getValue().isBound()) {
+                boundVars.add(entry.getKey());
+            }
+        }
+        return boundVars;
     }
 
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -112,7 +120,20 @@ public class RuleIntrospector implements ClassVisitor {
     }
 
     private void addDslPattern(String result) {
-        System.out.println(result);
+        DslPattern.Modifier modifier = DslPattern.Modifier.NONE;
+        if (result.startsWith("this.not(")) {
+            modifier = DslPattern.Modifier.NOT;
+            result = result.substring("this.not(".length(), result.length()-1);
+        } else if (result.startsWith("this.exists(")) {
+            modifier = DslPattern.Modifier.EXISTS;
+            result = result.substring("this.exists(".length(), result.length()-1);
+        }
+
+        if (modifier != DslPattern.Modifier.NONE && result.endsWith(".class")) {
+            unboundPatterns.add(new DslPattern(result.substring(0, result.length() - ".class".length()), null).setModifier(modifier));
+            return;
+        }
+
         int firstDot = result.indexOf('.');
         String id = result.substring(0, firstDot);
         String negation = "";
@@ -121,6 +142,6 @@ public class RuleIntrospector implements ClassVisitor {
             id = id.substring(1);
         }
         String constraint = result.substring(firstDot + 1);
-        dslPatterns.get(id).addConstraint(negation + constraint);
+        dslPatterns.get(id).addConstraint(negation + constraint).setModifier(modifier);
     }
 }

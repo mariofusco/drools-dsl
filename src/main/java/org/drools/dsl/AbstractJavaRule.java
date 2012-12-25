@@ -25,7 +25,19 @@ public abstract class AbstractJavaRule {
         }
     }
 
+    protected final boolean not(Class<?> value) {
+        return false;
+    }
+
     protected final boolean not(boolean value) {
+        return value;
+    }
+
+    protected final boolean exists(Class<?> value) {
+        return false;
+    }
+
+    protected final boolean exists(boolean value) {
         return value;
     }
 }

@@ -11,8 +11,11 @@ import java.util.List;
 public class DslPackageBuilder {
     private final DslPackageDescrBuilder dslPackageDescrBuilder = new DslPackageDescrBuilder();
 
-    public void addRule(Class<?> ruleClass) {
-        dslPackageDescrBuilder.addRule(ruleClass);
+    public DslPackageBuilder addRule(Class<? extends AbstractJavaRule>... ruleClasses) {
+        for (Class<? extends AbstractJavaRule> ruleClass : ruleClasses) {
+            dslPackageDescrBuilder.addRule(ruleClass);
+        }
+        return this;
     }
 
     public List<KnowledgePackage> getKnowledgePackages() {

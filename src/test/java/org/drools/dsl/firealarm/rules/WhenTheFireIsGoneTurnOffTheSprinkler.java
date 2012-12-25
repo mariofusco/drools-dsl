@@ -13,7 +13,7 @@ public class WhenTheFireIsGoneTurnOffTheSprinkler extends AbstractJavaRule {
 
     @Override
     public boolean lhs() {
-        return $sprinkler.equals($room) && not($fire.getRoom().equals($room));
+        return $sprinkler.getRoom().equals($room) && $sprinkler.isOn() && not($fire.getRoom().equals($room));
     }
 
     @Override

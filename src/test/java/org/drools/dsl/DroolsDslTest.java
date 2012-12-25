@@ -14,9 +14,8 @@ public class DroolsDslTest {
 
     @Test
     public void testDsl() {
-        DslPackageBuilder dslPackageBuilder = new DslPackageBuilder();
-        dslPackageBuilder.addRule(HelloWorldRule.class);
-        dslPackageBuilder.addRule(HiUniverseRule.class);
+        DslPackageBuilder dslPackageBuilder = new DslPackageBuilder()
+                .addRule(HelloWorldRule.class, HiUniverseRule.class);
 
         KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
         kbase.addKnowledgePackages( dslPackageBuilder.getKnowledgePackages() );

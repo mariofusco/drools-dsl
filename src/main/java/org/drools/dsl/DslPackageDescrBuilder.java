@@ -6,6 +6,8 @@ import org.drools.lang.api.PackageDescrBuilder;
 import org.drools.lang.api.PatternDescrBuilder;
 import org.drools.lang.api.RuleDescrBuilder;
 import org.drools.lang.descr.AndDescr;
+import org.drools.lang.descr.ExistsDescr;
+import org.drools.lang.descr.NotDescr;
 import org.drools.lang.descr.PackageDescr;
 
 import java.util.Collection;
@@ -16,34 +18,56 @@ public class DslPackageDescrBuilder {
 
     private final PackageDescrBuilder packageDescrBuilder = newPackage();
 
-    private int counter = 0;
-
     public PackageDescr getPackageDescr() {
         return packageDescrBuilder.getDescr();
     }
 
-    public void addRule(Class<?> ruleClass) {
+    public void addRule(Class<? extends AbstractJavaRule> ruleClass) {
         RuleIntrospector ruleIntrospector = new RuleIntrospector(ruleClass);
 
         CEDescrBuilder<CEDescrBuilder<RuleDescrBuilder, AndDescr>, AndDescr> ceDescrBuilder =
         packageDescrBuilder.newRule()
-            .name("R" + counter++)
+            .name(ruleClass.getName())
                 .lhs()
                     .and();
 
         for (DslPattern dslPattern : ruleIntrospector.getDslPatterns()) {
-            PatternDescrBuilder<CEDescrBuilder<CEDescrBuilder<RuleDescrBuilder, AndDescr>, AndDescr>> patternDescrBuilder =
-                    ceDescrBuilder.pattern(dslPattern.getType()).id(dslPattern.getId(), false);
+            if (!dslPattern.isBound()) {
+                switch (dslPattern.getModifier()) {
+                    case NOT:
+                        PatternDescrBuilder<CEDescrBuilder<CEDescrBuilder<CEDescrBuilder<RuleDescrBuilder,AndDescr>,AndDescr>,NotDescr>> notDescrBuilder =
+                                ceDescrBuilder.not().pattern(dslPattern.getType());
 
-            for (String constraint : dslPattern.getConstraints()) {
-                patternDescrBuilder.constraint(constraint);
+                        for (String constraint : dslPattern.getConstraints()) {
+                            notDescrBuilder.constraint(constraint);
+                        }
+                        notDescrBuilder.end();
+                        break;
+                    case EXISTS:
+                        PatternDescrBuilder<CEDescrBuilder<CEDescrBuilder<CEDescrBuilder<RuleDescrBuilder,AndDescr>,AndDescr>,ExistsDescr>> existsDescrBuilder =
+                                ceDescrBuilder.exists().pattern(dslPattern.getType());
+
+                        for (String constraint : dslPattern.getConstraints()) {
+                            existsDescrBuilder.constraint(constraint);
+                        }
+                        existsDescrBuilder.end();
+                        break;
+                }
+
+            } else {
+                PatternDescrBuilder<CEDescrBuilder<CEDescrBuilder<RuleDescrBuilder, AndDescr>, AndDescr>> patternDescrBuilder =
+                        ceDescrBuilder.pattern(dslPattern.getType()).id(dslPattern.getId(), false);
+
+                for (String constraint : dslPattern.getConstraints()) {
+                    patternDescrBuilder.constraint(constraint);
+                }
+                patternDescrBuilder.end();
             }
-            patternDescrBuilder.end();
         }
 
         ceDescrBuilder.end()
                 .end()
-                .rhs(writeRhs(ruleClass, ruleIntrospector.getVars().keySet()))
+                .rhs(writeRhs(ruleClass, ruleIntrospector.getBoundVars()))
             .end();
     }
 
