@@ -4,11 +4,7 @@ import org.drools.dsl.DslPackageBuilder;
 import org.drools.dsl.firealarm.model.Fire;
 import org.drools.dsl.firealarm.model.Room;
 import org.drools.dsl.firealarm.model.Sprinkler;
-import org.drools.dsl.firealarm.rules.CancelTheAlarmWhenAllTheFiresHaveGone;
-import org.drools.dsl.firealarm.rules.RaiseTheAlarmWhenWeHaveOneOrMoreFires;
-import org.drools.dsl.firealarm.rules.StatusOutputWhenThingsAreOk;
-import org.drools.dsl.firealarm.rules.WhenTheFireIsGoneTurnOffTheSprinkler;
-import org.drools.dsl.firealarm.rules.WhenThereIsAFireTurnOnTheSprinkler;
+import org.drools.dsl.firealarm.rules.FireAlarmRules;
 import org.junit.Test;
 import org.kie.KnowledgeBase;
 import org.kie.KnowledgeBaseFactory;
@@ -21,13 +17,15 @@ public class FireAlarmTest {
 
     @Test
     public void testFireAlarm() {
-
+/*
         DslPackageBuilder dslPackageBuilder = new DslPackageBuilder()
                 .addRule( WhenThereIsAFireTurnOnTheSprinkler.class,
                           WhenTheFireIsGoneTurnOffTheSprinkler.class,
                           RaiseTheAlarmWhenWeHaveOneOrMoreFires.class,
                           CancelTheAlarmWhenAllTheFiresHaveGone.class,
                           StatusOutputWhenThingsAreOk.class );
+*/
+        DslPackageBuilder dslPackageBuilder = new DslPackageBuilder().addRule(FireAlarmRules.class);
 
         KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
         kbase.addKnowledgePackages( dslPackageBuilder.getKnowledgePackages() );

@@ -8,12 +8,22 @@ import org.kie.definition.KnowledgePackage;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.reflect.Modifier.isStatic;
+
 public class DslPackageBuilder {
     private final DslPackageDescrBuilder dslPackageDescrBuilder = new DslPackageDescrBuilder();
 
-    public DslPackageBuilder addRule(Class<? extends AbstractJavaRule>... ruleClasses) {
-        for (Class<? extends AbstractJavaRule> ruleClass : ruleClasses) {
-            dslPackageDescrBuilder.addRule(ruleClass);
+    public DslPackageBuilder addRule(Class<?>... ruleClasses) {
+        for (Class<?> ruleClass : ruleClasses) {
+            if (AbstractJavaRule.class.isAssignableFrom(ruleClass)) {
+                dslPackageDescrBuilder.addRule((Class<? extends AbstractJavaRule>)ruleClass);
+            } else {
+                for (Class<?> innerClass : ruleClass.getDeclaredClasses()) {
+                    if (isStatic(innerClass.getModifiers())) {
+                        addRule(innerClass);
+                    }
+                }
+            }
         }
         return this;
     }

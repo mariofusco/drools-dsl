@@ -73,7 +73,8 @@ public class DslPackageDescrBuilder {
 
     private String writeRhs(Class<?> ruleClass, Collection<String> ids) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ruleClass.getName()).append(" obj = new ").append(ruleClass.getName()).append("();\n")
+        String className = ruleClass.getName().replace('$', '.');
+        sb.append(className).append(" obj = new ").append(className).append("();\n")
                 .append("obj.setDrools(drools);\n");
         for (String id : ids) {
             sb.append("obj.setValue(\"").append(id).append("\", ").append(id).append(");\n");
