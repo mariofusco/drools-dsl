@@ -9,9 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.reflect.Modifier.isStatic;
+import static org.drools.dsl.util.ClassUtil.getClasses;
 
 public class DslPackageBuilder {
     private final DslPackageDescrBuilder dslPackageDescrBuilder = new DslPackageDescrBuilder();
+
+    public DslPackageBuilder addRulesInPackage(String packageName) {
+        return addRule(getClasses(packageName));
+    }
 
     public DslPackageBuilder addRule(Class<?>... ruleClasses) {
         for (Class<?> ruleClass : ruleClasses) {

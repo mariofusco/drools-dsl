@@ -1,4 +1,4 @@
-package org.drools.dsl.firealarm.rules;
+package org.drools.dsl.firealarm;
 
 import org.drools.dsl.AbstractJavaRule;
 import org.drools.dsl.firealarm.model.Alarm;
